@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "dompurify": "^3.3.3",
+    "html2pdf.js": "^0.14.0",
     "jszip": "^3.10.1",
     "marked": "^17.0.5"
   }

@@ -1,82 +1,74 @@
 /* koda.css — Koda Markdown Editor Styles */
 
 /* ═══════════ Preview Paper ═══════════ */
-.preview-paper {
-    margin: 0 auto;
-    position: relative;
-    padding: 60px;
-    min-height: 400px;
-    outline: none;
-    transition: max-width 0.3s ease, width 0.3s ease, height 0.3s ease;
+/* Wrapper to handle scaling and centering the physical paper */
+.paper-scale-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    width: 100%;
+    background: transparent !important;
 }
 
+#preview-container {
+    background: #f8fafc !important; /* slate-50 para combinar com o tema claro */
+}
+
+.dark #preview-container {
+    background: #020617 !important; /* slate-950 para o tema escuro */
+}
+
+.preview-paper {
+    background: white;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.05);
+    position: relative;
+    outline: none;
+    flex-shrink: 0;
+    border-radius: 2px;
+    /* transition removed to prevent scale flickering */
+}
+
+/* Focus and hover states for content editable */
 .preview-paper[contenteditable="true"]:hover {
     box-shadow: 0 0 0 2px #2b2bee33, 0 25px 50px -12px rgb(0 0 0 / 0.25);
 }
-
 .preview-paper[contenteditable="true"]:focus {
     box-shadow: 0 0 0 2px #2b2bee66, 0 25px 50px -12px rgb(0 0 0 / 0.25);
 }
 
-.paper-portrait {
-    max-width: 800px;
-}
+/* ═══════════ F1: Real Page Mode (Physical Sizes) ═══════════ */
 
-.paper-landscape {
-    max-width: 1120px;
+/* Dimensions in mm directly matching real paper */
+.page-a4-portrait {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 24mm 20mm;
 }
-
-/* ═══════════ F1: Preview A4 Real Page Mode ═══════════ */
-.preview-container.page-mode {
-    background: #6b7280;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 32px;
-    padding: 40px 20px;
-    overflow-y: auto;
+.page-a4-landscape {
+    width: 297mm;
+    min-height: 210mm;
+    padding: 20mm 24mm;
 }
-
-.preview-container.page-mode .preview-paper {
-    flex-shrink: 0;
-    margin: 0;
-    border-radius: 2px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.25);
+.page-letter-portrait {
+    width: 215.9mm;
+    min-height: 279.4mm;
+    padding: 24mm 20mm;
 }
-
-/* A4 Portrait: 794px x 1123px @ 96dpi */
-.preview-container.page-mode .preview-paper.page-a4-portrait {
-    width: 794px;
-    min-height: 1123px;
-    padding: 96px 80px;
+.page-letter-landscape {
+    width: 279.4mm;
+    min-height: 215.9mm;
+    padding: 20mm 24mm;
 }
-/* A4 Landscape */
-.preview-container.page-mode .preview-paper.page-a4-landscape {
-    width: 1123px;
-    min-height: 794px;
-    padding: 72px 96px;
+.page-legal-portrait {
+    width: 215.9mm;
+    min-height: 355.6mm;
+    padding: 24mm 20mm;
 }
-/* Letter Portrait: 816px x 1056px */
-.preview-container.page-mode .preview-paper.page-letter-portrait {
-    width: 816px;
-    min-height: 1056px;
-    padding: 96px 80px;
-}
-.preview-container.page-mode .preview-paper.page-letter-landscape {
-    width: 1056px;
-    min-height: 816px;
-    padding: 72px 96px;
-}
-/* Legal Portrait: 816px x 1344px */
-.preview-container.page-mode .preview-paper.page-legal-portrait {
-    width: 816px;
-    min-height: 1344px;
-    padding: 96px 80px;
-}
-.preview-container.page-mode .preview-paper.page-legal-landscape {
-    width: 1344px;
-    min-height: 816px;
-    padding: 72px 96px;
+.page-legal-landscape {
+    width: 355.6mm;
+    min-height: 215.9mm;
+    padding: 20mm 24mm;
 }
 
 /* ═══════════ Page Break Visuals ═══════════ */
@@ -186,56 +178,81 @@
 
 /* ═══════════ Print Styles ═══════════ */
 @media print {
+    /* Safe visibility approach */
     body * {
         visibility: hidden !important;
     }
+    
     #preview-container,
     #preview-container * {
         visibility: visible !important;
     }
+    
     #preview-container {
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
         width: 100% !important;
-        padding: 0 !important;
         margin: 0 !important;
+        padding: 0 !important;
         background: white !important;
         overflow: visible !important;
     }
+    
     .preview-paper {
-        box-shadow: none !important;
+        /* Let the @page margin dictate the wrapper, remove fixed px constraint */
+        width: 100% !important;
         max-width: none !important;
+        height: auto !important;
         margin: 0 !important;
+        /* Keep internal content padding */
         padding: 0 !important;
+        box-shadow: none !important;
         color: black !important;
         background: white !important;
+        border: none !important;
+    }
+
+    /* Cancel fixed width logic from page modes */
+    .preview-paper[class*="page-a4"],
+    .preview-paper[class*="page-letter"],
+    .preview-paper[class*="page-legal"],
+    .paper-landscape,
+    .paper-portrait {
+        width: 100% !important;
+        min-height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
     
-    @page {
-        margin: 20mm;
-    }
-    
-    .paper-landscape {
-        width: 297mm !important;
-        height: 210mm !important;
-    }
     .preview-paper * {
         color: black !important;
     }
+    
     .preview-paper table,
     .preview-paper th,
     .preview-paper td {
         border-color: #ccc !important;
     }
+    
+    /* Hide overlays */
     .page-break-line,
-    .page-break-label {
+    .page-break-label,
+    #new-doc-modal,
+    #docs-modal,
+    #global-drop-zone,
+    .tour-overlay,
+    .tour-tooltip,
+    .tour-highlight-box {
         display: none !important;
+        visibility: hidden !important;
     }
+    
     ::-webkit-scrollbar {
         display: none;
     }
 }
+
 
 /* ═══════════ F2: Drop Zone ═══════════ */
 .drop-zone-active {

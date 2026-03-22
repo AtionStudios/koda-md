@@ -186,10 +186,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedTemplate   = 'blank';
     let isPageMode         = false;
 
+    // Total heights in px at 96 DPI
     const PAGE_HEIGHTS = {
-        a4:     { portrait: 1055, landscape: 720 },
-        letter: { portrait: 1018, landscape: 750 },
-        legal:  { portrait: 1318, landscape: 750 }
+        a4:     { portrait: 1123, landscape: 794 },
+        letter: { portrait: 1056, landscape: 816 },
+        legal:  { portrait: 1344, landscape: 816 }
     };
 
     // ═══════════════════════════════════════════
@@ -363,26 +364,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updatePageBreaks() {
-        const ori = cfgPaperOri.value || 'portrait';
+        const ori   = cfgPaperOri.value  || 'portrait';
+        const paper = cfgPaperSize.value || 'a4';
+
         preview.classList.toggle('paper-landscape', ori === 'landscape');
         preview.classList.toggle('paper-portrait',  ori !== 'landscape');
+
+        // Map internal paper names to CSS @page size values
+        const paperCssName = { a4: 'A4', letter: 'letter', legal: 'legal' };
+        const cssName = paperCssName[paper] || 'A4';
+
+        // Inject FULL @page rule: size = paper + orientation
+        // This makes the browser PDF engine use the exact same paper as the preview
         let styleEl = document.getElementById('print-orientation-style');
-        if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'print-orientation-style'; document.head.appendChild(styleEl); }
-        styleEl.innerHTML = `@media print { @page { size: ${ori}; } }`;
+        if (!styleEl) {
+            styleEl = document.createElement('style');
+            styleEl.id = 'print-orientation-style';
+            document.head.appendChild(styleEl);
+        }
+        styleEl.innerHTML = `@media print { @page { size: ${cssName} ${ori}; margin: 18mm 20mm; } }`;
 
         preview.querySelectorAll('.page-break-line, .page-break-label').forEach(el => el.remove());
         if (!pageBreakToggle.checked) return;
 
         requestAnimationFrame(() => {
             const contentHeight = preview.scrollHeight;
-            const usableH       = getPageHeight() - 120;
+            // 24mm ≈ 91px, 20mm ≈ 76px (@ 96dpi)
+            const padTop = (ori === 'portrait') ? 91 : 76; 
+            const padFix = (ori === 'portrait') ? 182 : 152; // top + bottom padding
+            const usableH = getPageHeight() - padFix;
+            
             if (usableH <= 0 || contentHeight <= usableH) return;
             const numBreaks = Math.floor(contentHeight / usableH);
+            
             for (let i = 1; i <= numBreaks; i++) {
-                const yPos  = i * usableH;
-                const line  = Object.assign(document.createElement('div'), { className: 'page-break-line' });
+                const yPos  = padTop + (i * usableH);
+                const line  = Object.assign(document.createElement('div'), { className: 'page-break-line', 'data-no-print': 'true' });
                 line.style.top = yPos + 'px';
-                const label = Object.assign(document.createElement('div'), { className: 'page-break-label', textContent: `Page ${i + 1}` });
+                const label = Object.assign(document.createElement('div'), { className: 'page-break-label', textContent: `Page ${i + 1}`, 'data-no-print': 'true' });
                 label.style.top = yPos + 'px';
                 preview.appendChild(line);
                 preview.appendChild(label);
@@ -396,14 +415,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyPageMode(active) {
         isPageMode = active;
         if (active) {
-            previewContainer.classList.add('page-mode');
             const paper = cfgPaperSize.value || 'a4';
             const ori   = cfgPaperOri.value  || 'portrait';
             // Remove old page classes
             preview.className = preview.className.replace(/page-[a-z]+-[a-z]+/g, '').trim();
             preview.classList.add(`page-${paper}-${ori}`);
         } else {
-            previewContainer.classList.remove('page-mode');
             preview.className = preview.className.replace(/page-[a-z]+-[a-z]+/g, '').trim();
         }
     }
@@ -461,6 +478,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ═══════════════════════════════════════════
+    // FIT PAPER SCALE OBSERVER
+    // ═══════════════════════════════════════════
+    function fitPreviewPaperScale() {
+        if (!isPageMode || previewContainer.classList.contains('hidden')) return;
+        
+        // Reset to read actual physically computed pixel width (from MM)
+        preview.style.transform = 'none';
+        
+        const availableW = previewContainer.clientWidth - 40; // 20px padding each side in wrapper
+        const paperW     = preview.offsetWidth;
+        const paperH     = preview.offsetHeight;
+        const scale      = (paperW > availableW && paperW > 0) ? availableW / paperW : 1;
+        
+        if (scale < 1) {
+            preview.style.transform = `scale(${scale})`;
+            preview.style.transformOrigin = 'top center';
+            preview.style.marginBottom = '0'; // Remover a gambiarra antiga
+            
+            // Set scale wrapper height to match scaled down paper to properly handle container scrolling
+            const wrapper = preview.closest('.paper-scale-wrapper');
+            if (wrapper) {
+                // padding applied in CSS is 40px top + 40px bottom roughly
+                wrapper.style.minHeight = `${(paperH * scale) + 80}px`;
+            }
+        } else {
+            preview.style.transform = 'none';
+            preview.style.marginBottom = '0';
+            const wrapper = preview.closest('.paper-scale-wrapper');
+            if (wrapper) wrapper.style.minHeight = 'auto';
+        }
+    }
+
+    const ro = new ResizeObserver(() => window.requestAnimationFrame(fitPreviewPaperScale));
+    ro.observe(previewContainer);
+
+    // ═══════════════════════════════════════════
     // VIEW MODES
     // ═══════════════════════════════════════════
     const viewBtns = {
@@ -481,13 +534,13 @@ document.addEventListener('DOMContentLoaded', () => {
     viewBtns.split.onclick = () => {
         editorContainer.classList.remove('hidden'); editorContainer.style.width = '50%';
         previewContainer.classList.remove('hidden'); previewContainer.style.width = '50%';
-        applyPageMode(false);
+        applyPageMode(true);
         setViewClasses('split');
     };
     viewBtns.code.onclick = () => {
         editorContainer.classList.remove('hidden'); editorContainer.style.width = '100%';
         previewContainer.classList.add('hidden');
-        applyPageMode(false);
+        // pageMode can stay true behind the scenes
         setViewClasses('code');
     };
     viewBtns.preview.onclick = () => {
@@ -787,6 +840,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderPreview();
         renderDocList();
+        
+        // Ativa o modo de página físico assim que a renderização inicial estiver pronta
+        applyPageMode(true);
+        setViewClasses('split'); // Garante que o estado visual dos botões também condiz com inicialização
+
         setTimeout(startTour, 800); // slight delay so UI is stable
     }
 

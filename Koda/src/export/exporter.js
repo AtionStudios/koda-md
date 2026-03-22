@@ -1,6 +1,7 @@
 // src/export/exporter.js
 import JSZip from 'jszip';
 import { dbGetAll } from '../persistence/db.js';
+import html2pdf from 'html2pdf.js';
 
 export function downloadFile(content, filename, contentType) {
     const blob = new Blob([content], { type: contentType });
@@ -17,7 +18,40 @@ export function exportCurrent(format, text, titleInputVal) {
     const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
     if (format === 'pdf') {
-        window.print();
+        // Read current paper settings from DOM
+        const formatSelect = document.getElementById('cfg-paper-size');
+        const oriSelect    = document.getElementById('cfg-paper-orientation');
+        
+        const paperFormat = formatSelect ? formatSelect.value : 'a4';
+        const paperOri    = oriSelect    ? oriSelect.value    : 'portrait';
+
+        const paperEl = document.querySelector('.preview-paper');
+        if (!paperEl) return;
+
+        // html2pdf options
+        const opt = {
+            margin:       0, // Margins are already handled by CSS padding inside the paper
+            filename:     `${safeTitle}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: paperEl.scrollWidth },
+            jsPDF:        { unit: 'mm', format: paperFormat, orientation: paperOri }
+        };
+
+        // Suppress visual scale trick for a clean, non-blinking 1:1 mm capture
+        const originalTransform = paperEl.style.transform;
+        paperEl.style.transform = 'none';
+        
+        // Hide elements that shouldn't be printed (like page break markers)
+        const noPrintEls = paperEl.querySelectorAll('[data-no-print="true"]');
+        noPrintEls.forEach(el => el.style.display = 'none');
+
+        html2pdf().set(opt).from(paperEl).save().then(() => {
+            // Restore hidden elements
+            noPrintEls.forEach(el => el.style.display = '');
+            // Seamlessly restore UI scale
+            paperEl.style.transform = originalTransform;
+        });
+
     } else if (format === 'md') {
         downloadFile(text, `${safeTitle}.md`, 'text/markdown');
     } else if (format === 'txt') {
