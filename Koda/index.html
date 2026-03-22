@@ -236,6 +236,95 @@ Backup Everything (.zip)
     </div>
 </div>
 
+<!-- ═══════════════════════ NEW DOCUMENT MODAL ═══════════════════════ -->
+<div id="new-doc-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-slate-800">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
+            <div class="flex items-center gap-3">
+                <div class="bg-primary/10 p-2 rounded-xl">
+                    <span class="material-symbols-outlined text-primary text-2xl">add_circle</span>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">New Document</h2>
+                    <p class="text-xs text-slate-500">Choose a starting point</p>
+                </div>
+            </div>
+            <button id="btn-close-new-modal" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <!-- Body -->
+        <div class="p-6 space-y-5">
+            <!-- Title input -->
+            <div>
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Document Title</label>
+                <input id="new-doc-title-input" type="text" placeholder="Untitled Document"
+                    class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"/>
+            </div>
+            <!-- Template grid -->
+            <div>
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Template</label>
+                <div class="template-grid">
+                    <button class="template-card selected" data-template="blank">
+                        <span class="template-icon">📄</span>
+                        <div>
+                            <p class="text-sm font-bold text-slate-900 dark:text-slate-100">Blank</p>
+                            <p class="text-xs text-slate-500">Empty document</p>
+                        </div>
+                    </button>
+                    <button class="template-card" data-template="report">
+                        <span class="template-icon">📑</span>
+                        <div>
+                            <p class="text-sm font-bold text-slate-900 dark:text-slate-100">Report</p>
+                            <p class="text-xs text-slate-500">Structured sections</p>
+                        </div>
+                    </button>
+                    <button class="template-card" data-template="meeting">
+                        <span class="template-icon">📝</span>
+                        <div>
+                            <p class="text-sm font-bold text-slate-900 dark:text-slate-100">Meeting Notes</p>
+                            <p class="text-xs text-slate-500">Agenda & decisions</p>
+                        </div>
+                    </button>
+                    <button class="template-card" data-template="readme">
+                        <span class="template-icon">📋</span>
+                        <div>
+                            <p class="text-sm font-bold text-slate-900 dark:text-slate-100">README</p>
+                            <p class="text-xs text-slate-500">Project documentation</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            <!-- Upload / Drop zone -->
+            <div>
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Or Import Existing File</label>
+                <label id="new-doc-upload-zone" class="flex flex-col items-center justify-center gap-2 p-5 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
+                    <span class="material-symbols-outlined text-3xl text-slate-400">upload_file</span>
+                    <span class="text-sm font-medium text-slate-500">Drag & drop a <strong>.md</strong> or <strong>.txt</strong> file here, or click to browse</span>
+                    <input id="new-doc-file-input" type="file" accept=".md,.txt" class="hidden"/>
+                </label>
+            </div>
+        </div>
+        <!-- Footer -->
+        <div class="flex items-center justify-end gap-3 p-6 border-t border-slate-100 dark:border-slate-800">
+            <button id="btn-cancel-new-doc" class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">Cancel</button>
+            <button id="btn-confirm-new-doc" class="bg-primary text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                Create Document
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Global drop zone overlay (appears when dragging over the whole window) -->
+<div id="global-drop-zone" class="hidden">
+    <div class="drop-zone-label">
+        <span class="material-symbols-outlined text-4xl">upload_file</span>
+        Drop your .md or .txt file here
+    </div>
+</div>
+
 <script type="module" src="/src/main.js"></script>
 </body>
+
 </html>

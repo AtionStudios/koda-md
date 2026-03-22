@@ -7,7 +7,7 @@
     padding: 60px;
     min-height: 400px;
     outline: none;
-    transition: max-width 0.3s ease;
+    transition: max-width 0.3s ease, width 0.3s ease, height 0.3s ease;
 }
 
 .preview-paper[contenteditable="true"]:hover {
@@ -24,6 +24,59 @@
 
 .paper-landscape {
     max-width: 1120px;
+}
+
+/* ═══════════ F1: Preview A4 Real Page Mode ═══════════ */
+.preview-container.page-mode {
+    background: #6b7280;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    padding: 40px 20px;
+    overflow-y: auto;
+}
+
+.preview-container.page-mode .preview-paper {
+    flex-shrink: 0;
+    margin: 0;
+    border-radius: 2px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.25);
+}
+
+/* A4 Portrait: 794px x 1123px @ 96dpi */
+.preview-container.page-mode .preview-paper.page-a4-portrait {
+    width: 794px;
+    min-height: 1123px;
+    padding: 96px 80px;
+}
+/* A4 Landscape */
+.preview-container.page-mode .preview-paper.page-a4-landscape {
+    width: 1123px;
+    min-height: 794px;
+    padding: 72px 96px;
+}
+/* Letter Portrait: 816px x 1056px */
+.preview-container.page-mode .preview-paper.page-letter-portrait {
+    width: 816px;
+    min-height: 1056px;
+    padding: 96px 80px;
+}
+.preview-container.page-mode .preview-paper.page-letter-landscape {
+    width: 1056px;
+    min-height: 816px;
+    padding: 72px 96px;
+}
+/* Legal Portrait: 816px x 1344px */
+.preview-container.page-mode .preview-paper.page-legal-portrait {
+    width: 816px;
+    min-height: 1344px;
+    padding: 96px 80px;
+}
+.preview-container.page-mode .preview-paper.page-legal-landscape {
+    width: 1344px;
+    min-height: 816px;
+    padding: 72px 96px;
 }
 
 /* ═══════════ Page Break Visuals ═══════════ */
@@ -182,4 +235,194 @@
     ::-webkit-scrollbar {
         display: none;
     }
+}
+
+/* ═══════════ F2: Drop Zone ═══════════ */
+.drop-zone-active {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(43, 43, 238, 0.12);
+    border: 3px dashed #2b2bee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    backdrop-filter: blur(2px);
+}
+
+.drop-zone-active .drop-zone-label {
+    background: #2b2bee;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 24px 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 20px 60px rgba(43,43,238,0.4);
+    pointer-events: none;
+}
+
+/* Template card grid */
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.template-card {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.dark .template-card {
+    border-color: #334155;
+    background: #1e293b;
+}
+
+.template-card:hover,
+.template-card.selected {
+    border-color: #2b2bee;
+    background: #eef2ff;
+    box-shadow: 0 0 0 3px rgba(43,43,238,0.12);
+}
+
+.dark .template-card:hover,
+.dark .template-card.selected {
+    background: #1e1b4b;
+}
+
+.template-card .template-icon {
+    font-size: 2rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+/* ═══════════ F3: Onboarding Tour ═══════════ */
+.tour-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+.tour-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    pointer-events: all;
+}
+
+.tour-highlight-box {
+    position: fixed;
+    background: transparent;
+    box-shadow: 0 0 0 4px #2b2bee, 0 0 0 9999px rgba(0,0,0,0.55);
+    border-radius: 8px;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 10001;
+}
+
+.tour-tooltip {
+    position: fixed;
+    background: white;
+    border-radius: 14px;
+    padding: 20px 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 320px;
+    z-index: 10002;
+    pointer-events: all;
+    animation: tourFadeIn 0.25s ease;
+}
+
+.dark .tour-tooltip {
+    background: #1e293b;
+    color: #f1f5f9;
+}
+
+@keyframes tourFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.tour-tooltip .tour-step-count {
+    font-size: 11px;
+    font-weight: 700;
+    color: #2b2bee;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+}
+
+.tour-tooltip h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #0f172a;
+}
+.dark .tour-tooltip h4 { color: #f1f5f9; }
+
+.tour-tooltip p {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+}
+.dark .tour-tooltip p { color: #94a3b8; }
+
+.tour-tooltip .tour-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    gap: 8px;
+}
+
+.tour-btn-next {
+    background: #2b2bee;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+.tour-btn-next:hover { opacity: 0.85; }
+
+.tour-btn-skip {
+    background: none;
+    border: none;
+    font-size: 12px;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+.tour-btn-skip:hover { color: #64748b; }
+
+.tour-progress {
+    display: flex;
+    gap: 5px;
+}
+
+.tour-dot {
+    width: 7px; height: 7px;
+    border-radius: 99px;
+    background: #e2e8f0;
+    transition: background 0.2s, width 0.2s;
+}
+.tour-dot.active {
+    background: #2b2bee;
+    width: 18px;
 }
