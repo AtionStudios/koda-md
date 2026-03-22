@@ -11,8 +11,12 @@ IF NOT EXIST "%PROJECT_DIR%\dist" (
 )
 
 cd /d "%PROJECT_DIR%"
-echo [KODA] Serving production build on http://localhost:4173 ...
-echo [HINT] Press CTRL+C to stop the server.
+echo [KODA] Starting edge and serving production build on http://localhost:4173 ...
+
+:: Inicia o Edge com a URL do preview
+start msedge http://localhost:4173
+
+:: Inicia o servidor do Vite em modo preview
 call npm run preview
 
 pause

@@ -11,8 +11,12 @@ IF NOT EXIST "%PROJECT_DIR%\package.json" (
 )
 
 cd /d "%PROJECT_DIR%"
-echo [KODA] Starting Vite Dev Server...
-echo [HINT] Open http://localhost:5173 in your browser
+echo [KODA] Starting Edge and Vite Dev Server...
+
+:: Abre o Edge no endereço padrão do Vite
+start msedge http://localhost:5173
+
+:: Inicia o dev server
 call npm run dev
 
 pause

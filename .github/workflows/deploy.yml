@@ -6,6 +6,7 @@ on:
     branches: ["main", "master"]
   workflow_dispatch:
 
+# Permissões explicitas para o GITHUB_TOKEN poder interagir com o Pages
 permissions:
   contents: read
   pages: write
@@ -20,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
+        # Garante que o build aconteça na subpasta Koda
         working-directory: ./Koda
     steps:
       - name: Checkout
@@ -37,6 +39,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
+          # Pasta onde o Vite gera o build final
           path: ./Koda/dist
 
   deploy:
