@@ -11,6 +11,9 @@ IF NOT EXIST "%PROJECT_DIR%\dist" (
 )
 
 cd /d "%PROJECT_DIR%"
+echo [KODA] Gerando build fresquinha (npm run build)...
+call npm run build
+
 echo [KODA] Starting edge and serving production build on http://localhost:4173 ...
 
 :: Inicia o Edge com a URL do preview
