@@ -1,0 +1,23 @@
+{
+  "name": "koda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "koda.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "vite": "^8.0.1"
+  },
+  "dependencies": {
+    "dompurify": "^3.3.3",
+    "jszip": "^3.10.1",
+    "marked": "^17.0.5"
+  }
+}

@@ -1,0 +1,25 @@
+# Koda Project - Global Git Ignore
+# ══════════════════════════════════════════════
+
+# [H] Team Usage / Private Folders
+.agents/
+.gemini/
+Doc/
+manage_repo.bat
+
+# [H] OS / IDE Specific
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+
+# [H] Build & Dependencies (Vite)
+Koda/node_modules/
+Koda/dist/
+Koda/.vite/
+
+# [H] Environment
+.env
+.env.local
+.env.*.local
