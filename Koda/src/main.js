@@ -58,5 +58,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 4. Initial State Load
     await loadSettings();
     await renderDocList();
+    
+    // Explicitly render the first time
+    renderPreview();
+
     startTour();
 });

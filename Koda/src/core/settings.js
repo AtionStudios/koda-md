@@ -4,7 +4,8 @@ import { PAGE_HEIGHTS } from '../config/constants.js';
 import { getCurrentDocId } from './documentManager.js';
 import { applyPageMode, isPageModeActive } from '../ui/viewModes.js';
 
-let cfgFontFamily, cfgFontSize, cfgLineHeight, cfgPaperSize, cfgPaperOri, pageBreakToggle, preview;
+let cfgFontFamily, cfgFontSize, cfgLineHeight, cfgPaperSize, cfgPaperOri, pageBreakToggle, multiBreakToggle, preview;
+let cfgMT, cfgMB, cfgML, cfgMR;
 
 export function initSettings() {
     cfgFontFamily = document.getElementById('cfg-font-family');
@@ -12,16 +13,24 @@ export function initSettings() {
     cfgLineHeight = document.getElementById('cfg-line-height');
     cfgPaperSize  = document.getElementById('cfg-paper-size');
     cfgPaperOri   = document.getElementById('cfg-paper-orientation');
+    cfgMT         = document.getElementById('cfg-margin-top');
+    cfgMB         = document.getElementById('cfg-margin-bottom');
+    cfgML         = document.getElementById('cfg-margin-left');
+    cfgMR         = document.getElementById('cfg-margin-right');
     pageBreakToggle = document.getElementById('toggle-page-breaks');
-    preview       = document.getElementById('markdown-preview');
+    multiBreakToggle = document.getElementById('toggle-multi-breaks');
+    preview       = document.getElementById('preview-container'); // Container of pages
 
-    [cfgFontFamily, cfgFontSize, cfgLineHeight, cfgPaperSize, cfgPaperOri, pageBreakToggle].forEach(el => {
+    [cfgFontFamily, cfgFontSize, cfgLineHeight, cfgPaperSize, cfgPaperOri, cfgMT, cfgMB, cfgML, cfgMR, pageBreakToggle, multiBreakToggle].forEach(el => {
         if(el) {
             el.addEventListener('change', () => {
-                applyTypography(); 
-                updatePageBreaks();
-                if (isPageModeActive()) applyPageMode(true); 
+                window.dispatchEvent(new CustomEvent('koda-request-render'));
                 saveSettings();
+            });
+            el.addEventListener('input', () => {
+                if(el.type === 'number') {
+                   window.dispatchEvent(new CustomEvent('koda-request-render'));
+                }
             });
         }
     });
@@ -36,8 +45,13 @@ export async function loadSettings() {
         if (s.lineHeight && cfgLineHeight) cfgLineHeight.value  = s.lineHeight;
         if (s.paperSize && cfgPaperSize)   cfgPaperSize.value   = s.paperSize;
         if (s.paperOri && cfgPaperOri)     cfgPaperOri.value    = s.paperOri;
+        if (s.marginTop && cfgMT)          cfgMT.value          = s.marginTop;
+        if (s.marginBottom && cfgMB)       cfgMB.value          = s.marginBottom;
+        if (s.marginLeft && cfgML)         cfgML.value          = s.marginLeft;
+        if (s.marginRight && cfgMR)        cfgMR.value          = s.marginRight;
         if (s.theme === 'light') document.documentElement.classList.remove('dark');
         if (s.pageBreaks && pageBreakToggle) pageBreakToggle.checked = true;
+        if (s.multiBreaks && multiBreakToggle) multiBreakToggle.checked = true;
     } catch {
         // Settings failed to load, continue with defaults
     }
@@ -51,11 +65,28 @@ export function saveSettings() {
         fontSize:   cfgFontSize?.value || '',
         lineHeight: cfgLineHeight?.value || '',
         paperSize:  cfgPaperSize?.value || '',
-        paperOri:   cfgPaperOri?.value || '',
+        paperOri:   cfgPaperOri?.value || 'portrait',
+        marginTop:  cfgMT?.value || '20',
+        marginBottom: cfgMB?.value || '20',
+        marginLeft: cfgML?.value || '20',
+        marginRight: cfgMR?.value || '20',
         theme:      isDark ? 'dark' : 'light',
         pageBreaks: pageBreakToggle?.checked || false,
+        multiBreaks: multiBreakToggle?.checked || false,
         lastDocId:  getCurrentDocId()
     });
+}
+
+export function getPageSettings() {
+    return {
+        paperSize: cfgPaperSize?.value || 'a4',
+        paperOrientation: cfgPaperOri?.value || 'portrait',
+        marginTop: cfgMT?.value || '20',
+        marginBottom: cfgMB?.value || '20',
+        marginLeft: cfgML?.value || '20',
+        marginRight: cfgMR?.value || '20',
+        multiBreaks: multiBreakToggle?.checked || false
+    };
 }
 
 export function applyTypography() {

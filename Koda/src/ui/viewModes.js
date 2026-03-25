@@ -5,17 +5,10 @@ export let isPageMode = false;
 export function isPageModeActive() { return isPageMode; }
 
 export function applyPageMode(active) {
-    const preview = document.getElementById('markdown-preview');
-    if(!preview) return;
     isPageMode = active;
-    if (active) {
-        const paper = document.getElementById('cfg-paper-size')?.value || 'a4';
-        const ori   = document.getElementById('cfg-paper-orientation')?.value  || 'portrait';
-        preview.className = preview.className.replace(/page-[a-z]+-[a-z]+/g, '').trim();
-        preview.classList.add(`page-${paper}-${ori}`);
-    } else {
-        preview.className = preview.className.replace(/page-[a-z]+-[a-z]+/g, '').trim();
-    }
+    // The paginator renders pages on every change, 
+    // we don't need to manually update classes on a single preview element anymore.
+    // Sync.js calls renderPreview which uses the latest settings.
 }
 
 export function initViewModes() {

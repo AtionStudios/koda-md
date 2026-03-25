@@ -4,11 +4,22 @@ import DOMPurify from 'dompurify';
 
 marked.setOptions({ breaks: true, gfm: true });
 
-export function parseAndSanitize(markdownText) {
+export function parseAndSanitize(markdownText, options = {}) {
     if (!markdownText || !markdownText.trim()) {
         return '<h1>Untitled Document</h1><p>Start typing in the editor...</p>';
     }
-    const rawHtml = marked.parse(markdownText);
+    
+    let processedMd = markdownText;
+    if (options.multiBreaks) {
+        // Replace multiple newlines with markers to prevent marked from collapsing them
+        // We use a function to repeat the &nbsp; marker for every extra newline
+        processedMd = processedMd.replace(/\n\s*\n/g, (match) => {
+            const newlines = (match.match(/\n/g) || []).length;
+            return '\n\n' + '&nbsp;\n\n'.repeat(newlines - 1);
+        });
+    }
+
+    const rawHtml = marked.parse(processedMd);
     const cleanHtml = DOMPurify.sanitize(rawHtml);
     return cleanHtml;
 }

@@ -6,27 +6,47 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 40px 20px;
+    padding: 40px 0;
     width: 100%;
+    min-width: fit-content;
     background: transparent !important;
+    margin: 0 auto;
 }
 
 #preview-container {
     background: #f8fafc !important; /* slate-50 para combinar com o tema claro */
+    display: flex;
+    justify-content: center;
 }
 
 .dark #preview-container {
     background: #020617 !important; /* slate-950 para o tema escuro */
+    display: flex;
+    justify-content: center;
 }
 
 .preview-paper {
     background: white;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     position: relative;
     outline: none;
     flex-shrink: 0;
-    border-radius: 2px;
-    /* transition removed to prevent scale flickering */
+    border-radius: 1px;
+    margin-bottom: 20px; /* Space between pages in preview */
+    overflow: hidden;
+    box-sizing: border-box;
+    
+    padding: 0; /* Handled by .page-margin-container */
+}
+
+.page-margin-container {
+    /* Fixed utility area where content lives */
+    box-sizing: border-box;
+}
+
+.page-content {
+    width: 100%;
+    display: flow-root; 
 }
 
 /* Focus and hover states for content editable */
@@ -40,35 +60,30 @@
 /* ═══════════ F1: Real Page Mode (Physical Sizes) ═══════════ */
 
 /* Dimensions in mm directly matching real paper */
+/* Dimensions in mm directly matching real paper */
 .page-a4-portrait {
     width: 210mm;
-    min-height: 297mm;
-    padding: 24mm 20mm;
+    height: 297mm;
 }
 .page-a4-landscape {
     width: 297mm;
-    min-height: 210mm;
-    padding: 20mm 24mm;
+    height: 210mm;
 }
 .page-letter-portrait {
     width: 215.9mm;
-    min-height: 279.4mm;
-    padding: 24mm 20mm;
+    height: 279.4mm;
 }
 .page-letter-landscape {
     width: 279.4mm;
-    min-height: 215.9mm;
-    padding: 20mm 24mm;
+    height: 215.9mm;
 }
 .page-legal-portrait {
     width: 215.9mm;
-    min-height: 355.6mm;
-    padding: 24mm 20mm;
+    height: 355.6mm;
 }
 .page-legal-landscape {
     width: 355.6mm;
-    min-height: 215.9mm;
-    padding: 20mm 24mm;
+    height: 215.9mm;
 }
 
 /* ═══════════ Page Break Visuals ═══════════ */
@@ -200,13 +215,16 @@
     }
     
     .preview-paper {
-        /* Let the @page margin dictate the wrapper, remove fixed px constraint */
+        /* Page break control */
+        break-after: page !important;
+        page-break-after: always !important;
+        
         width: 100% !important;
         max-width: none !important;
         height: auto !important;
+        min-height: 100vh !important;
         margin: 0 !important;
         /* Keep internal content padding */
-        padding: 0 !important;
         box-shadow: none !important;
         color: black !important;
         background: white !important;

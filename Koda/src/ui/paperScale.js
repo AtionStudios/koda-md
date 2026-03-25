@@ -8,27 +8,23 @@ export function initPaperScaleObserver() {
     function fitPreviewPaperScale() {
         if (!isPageModeActive() || !previewContainer || previewContainer.classList.contains('hidden')) return;
         
-        preview.style.transform = 'none';
+        const wrapper = document.getElementById('page-wrapper');
+        if (!wrapper) return;
+
+        wrapper.style.transform = 'none';
         
-        const availableW = previewContainer.clientWidth - 40; 
-        const paperW     = preview.offsetWidth;
-        const paperH     = preview.offsetHeight;
+        const firstPage = wrapper.querySelector('.preview-paper');
+        if (!firstPage) return;
+
+        const availableW = previewContainer.clientWidth - 80; 
+        const paperW     = firstPage.offsetWidth;
         const scale      = (paperW > availableW && paperW > 0) ? availableW / paperW : 1;
         
         if (scale < 1) {
-            preview.style.transform = `scale(${scale})`;
-            preview.style.transformOrigin = 'top center';
-            preview.style.marginBottom = '0';
-            
-            const wrapper = preview.closest('.paper-scale-wrapper');
-            if (wrapper) {
-                wrapper.style.minHeight = `${(paperH * scale) + 80}px`;
-            }
+            wrapper.style.transform = `scale(${scale})`;
+            wrapper.style.transformOrigin = 'top center';
         } else {
-            preview.style.transform = 'none';
-            preview.style.marginBottom = '0';
-            const wrapper = preview.closest('.paper-scale-wrapper');
-            if (wrapper) wrapper.style.minHeight = 'auto';
+            wrapper.style.transform = 'none';
         }
     }
 

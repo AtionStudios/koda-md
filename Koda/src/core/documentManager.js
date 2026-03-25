@@ -1,7 +1,7 @@
 // src/core/documentManager.js
 import { dbPut, dbGet, dbGetAll, dbDelete } from '../persistence/db.js';
 import { saveSettings } from './settings.js';
-import { renderPreview } from '../editor/sync.js';
+// renderPreview import removed to fix circular dependency
 
 let currentDocId = null;
 
@@ -40,7 +40,7 @@ export async function loadDoc(id) {
     currentDocId = doc.id;
     document.getElementById('doc-title').value = doc.title;
     document.getElementById('markdown-input').value = doc.content;
-    renderPreview();
+    window.dispatchEvent(new CustomEvent('koda-request-render'));
     saveSettings();
     renderDocList();
 }
@@ -55,7 +55,7 @@ export function createNewDocument(title, content) {
     currentDocId = generateId();
     document.getElementById('doc-title').value = title || 'Untitled Document';
     document.getElementById('markdown-input').value = content || '';
-    renderPreview();
+    window.dispatchEvent(new CustomEvent('koda-request-render'));
     saveSettings();
     renderDocList();
 }

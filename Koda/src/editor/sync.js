@@ -1,7 +1,10 @@
 // src/editor/sync.js
 import { parseAndSanitize, htmlToMarkdown } from '../renderer/markdown.js';
-import { applyTypography, updatePageBreaks } from '../core/settings.js';
+import { applyTypography, getPageSettings } from '../core/settings.js';
 import { saveCurrentDoc } from '../core/documentManager.js';
+import { Paginator } from '../core/paginator.js';
+
+const paginator = new Paginator('page-wrapper');
 
 let isSyncing = false;
 let isPreviewEditing = false;
@@ -11,8 +14,11 @@ let previewEditTimeout = null;
 let textarea, preview, editorContainer, previewContainer, titleInput, statWords, statLines, statSaved;
 
 export function initEditorSync() {
+    window.addEventListener('koda-request-render', () => renderPreview());
+    
     textarea = document.getElementById('markdown-input');
-    preview = document.getElementById('markdown-preview');
+    // preview is now multiple pages inside previewContainer
+    editorContainer = document.getElementById('editor-container');
     editorContainer = document.getElementById('editor-container');
     previewContainer = document.getElementById('preview-container');
     titleInput = document.getElementById('doc-title');
@@ -20,26 +26,9 @@ export function initEditorSync() {
     statLines = document.getElementById('stat-lines');
     statSaved = document.getElementById('stat-saved');
 
-    if (preview) {
-        preview.contentEditable = "true";
-        preview.addEventListener('input', () => {
-            if (isPreviewEditing) return;
-            isPreviewEditing = true;
-            showSaveStatus(false);
-            clearTimeout(saveTimeout);
-            clearTimeout(previewEditTimeout);
-            previewEditTimeout = setTimeout(() => {
-                textarea.value = htmlToMarkdown(preview.innerHTML);
-                updateStats();
-                saveCurrentDoc(showSaveStatus);
-                isPreviewEditing = false;
-            }, 1000);
-        });
-    }
-
     if (textarea) {
         textarea.addEventListener('input', () => {
-            if (!isPreviewEditing) renderPreview();
+            renderPreview();
             showSaveStatus(false);
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(() => saveCurrentDoc(showSaveStatus), 1500);
@@ -73,11 +62,30 @@ export function initEditorSync() {
 }
 
 export function renderPreview() {
-    if(!preview || !textarea) return;
-    preview.innerHTML = parseAndSanitize(textarea.value);
-    applyTypography();
-    updatePageBreaks();
+    if(!textarea || !paginator) return;
+    const settings = getPageSettings();
+    const html = parseAndSanitize(textarea.value, { multiBreaks: settings.multiBreaks });
+    
+    paginator.render(html, settings);
+    
+    // Apply typography to each generated page
+    const pages = document.querySelectorAll('.preview-paper');
+    pages.forEach(page => applyTypographyToPage(page));
+    
     updateStats();
+}
+
+function applyTypographyToPage(page) {
+    const settings = getPageSettings();
+    const cfgFontSize = document.getElementById('cfg-font-size');
+    const cfgFontFamily = document.getElementById('cfg-font-family');
+    const cfgLineHeight = document.getElementById('cfg-line-height');
+    
+    if(!page || !cfgFontSize || !cfgFontFamily || !cfgLineHeight) return;
+    const sizePx = Math.round((parseInt(cfgFontSize.value) || 12) * 1.333);
+    page.style.fontFamily  = cfgFontFamily.value;
+    page.style.fontSize    = sizePx + 'px';
+    page.style.lineHeight  = String(parseFloat(cfgLineHeight.value) || 1.6);
 }
 
 export function updateStats() {
