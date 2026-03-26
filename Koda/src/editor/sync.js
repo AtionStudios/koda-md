@@ -19,7 +19,6 @@ export function initEditorSync() {
     textarea = document.getElementById('markdown-input');
     // preview is now multiple pages inside previewContainer
     editorContainer = document.getElementById('editor-container');
-    editorContainer = document.getElementById('editor-container');
     previewContainer = document.getElementById('preview-container');
     titleInput = document.getElementById('doc-title');
     statWords = document.getElementById('stat-words');
@@ -31,11 +30,7 @@ export function initEditorSync() {
             renderPreview();
             showSaveStatus(false);
             clearTimeout(saveTimeout);
-<<<<<<< HEAD
             saveTimeout = setTimeout(() => saveCurrentDoc(showSaveStatus), 2000);
-=======
-            saveTimeout = setTimeout(() => saveCurrentDoc(showSaveStatus), 1500);
->>>>>>> fbf4d06169cf57db7eb69afe6721c991bdbc0d20
         });
 
         textarea.addEventListener('scroll', () => {
@@ -50,11 +45,7 @@ export function initEditorSync() {
     if (titleInput) {
         titleInput.addEventListener('input', () => {
             clearTimeout(saveTimeout);
-<<<<<<< HEAD
             saveTimeout = setTimeout(() => saveCurrentDoc(showSaveStatus), 2000);
-=======
-            saveTimeout = setTimeout(() => saveCurrentDoc(showSaveStatus), 1500);
->>>>>>> fbf4d06169cf57db7eb69afe6721c991bdbc0d20
         });
     }
 
