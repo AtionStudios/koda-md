@@ -23,9 +23,14 @@ export function exportCurrent(format, text, titleInputVal, pdfConfig = null) {
             return;
         }
 
+<<<<<<< HEAD
         const paperFormat = pdfConfig.paperFormat || 'a4';
         const paperOri    = pdfConfig.paperOri || 'portrait';
         const paperContainer = pdfConfig.element;
+=======
+        const paperContainer = document.getElementById('preview-container');
+        if (!paperContainer) return;
+>>>>>>> fbf4d06169cf57db7eb69afe6721c991bdbc0d20
 
         // html2pdf options
         const opt = {

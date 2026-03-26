@@ -1,5 +1,9 @@
 // src/ui/tour.js
+<<<<<<< HEAD
 import { TOUR_STEPS } from '../shared/config/constants.js';
+=======
+import { TOUR_STEPS } from '../config/constants.js';
+>>>>>>> fbf4d06169cf57db7eb69afe6721c991bdbc0d20
 
 let tourStep = 0;
 

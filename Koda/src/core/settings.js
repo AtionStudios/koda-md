@@ -1,6 +1,10 @@
 // src/core/settings.js
 import { dbGet, dbPut } from '../persistence/db.js';
+<<<<<<< HEAD
 import { PAGE_HEIGHTS } from '../shared/config/constants.js';
+=======
+import { PAGE_HEIGHTS } from '../config/constants.js';
+>>>>>>> fbf4d06169cf57db7eb69afe6721c991bdbc0d20
 import { getCurrentDocId } from './documentManager.js';
 import { applyPageMode, isPageModeActive } from '../ui/viewModes.js';
 

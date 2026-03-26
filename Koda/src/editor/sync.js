@@ -31,7 +31,11 @@ export function initEditorSync() {
             renderPreview();
             showSaveStatus(false);
             clearTimeout(saveTimeout);
+<<<<<<< HEAD
             saveTimeout = setTimeout(() => saveCurrentDoc(showSaveStatus), 2000);
+=======
+            saveTimeout = setTimeout(() => saveCurrentDoc(showSaveStatus), 1500);
+>>>>>>> fbf4d06169cf57db7eb69afe6721c991bdbc0d20
         });
 
         textarea.addEventListener('scroll', () => {
@@ -46,7 +50,11 @@ export function initEditorSync() {
     if (titleInput) {
         titleInput.addEventListener('input', () => {
             clearTimeout(saveTimeout);
+<<<<<<< HEAD
             saveTimeout = setTimeout(() => saveCurrentDoc(showSaveStatus), 2000);
+=======
+            saveTimeout = setTimeout(() => saveCurrentDoc(showSaveStatus), 1500);
+>>>>>>> fbf4d06169cf57db7eb69afe6721c991bdbc0d20
         });
     }
 

@@ -1,5 +1,9 @@
 // src/ui/modals.js
+<<<<<<< HEAD
 import { TEMPLATES } from '../shared/config/constants.js';
+=======
+import { TEMPLATES } from '../config/constants.js';
+>>>>>>> fbf4d06169cf57db7eb69afe6721c991bdbc0d20
 import { createNewDocument, saveCurrentDoc } from '../core/documentManager.js';
 
 let selectedTemplate = 'blank';

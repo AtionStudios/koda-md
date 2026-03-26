@@ -6,8 +6,12 @@
  */
 export class Paginator {
     constructor(containerId) {
+<<<<<<< HEAD
         this.containerId = containerId;
         this.container = null; // Resolved lazily on first render
+=======
+        this.container = document.getElementById(containerId);
+>>>>>>> fbf4d06169cf57db7eb69afe6721c991bdbc0d20
         this.pages = [];
     }
 
@@ -17,10 +21,13 @@ export class Paginator {
      * @param {object} settings {纸张大小, 纸张方向, 边距}
      */
     render(html, settings) {
+<<<<<<< HEAD
         // Lazily resolve after modules have been mounted
         if (!this.container) {
             this.container = document.getElementById(this.containerId);
         }
+=======
+>>>>>>> fbf4d06169cf57db7eb69afe6721c991bdbc0d20
         if (!this.container) return;
 
         let measureContainer = document.getElementById('paginator-measure-container');
