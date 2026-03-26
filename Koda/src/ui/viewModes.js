@@ -27,6 +27,10 @@ export function initViewModes() {
             viewBtns[active].classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-primary');
             viewBtns[active].classList.remove('text-slate-500');
         }
+        
+        // Aplica classe no body para permitir CSS contextual (ex: layout centralizado no modo code)
+        document.body.classList.remove('mode-split', 'mode-code', 'mode-preview');
+        document.body.classList.add(`mode-${active}`);
     }
 
     if (viewBtns.split) viewBtns.split.onclick = () => {
