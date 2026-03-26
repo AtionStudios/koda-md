@@ -14,15 +14,20 @@
 }
 
 #preview-container {
-    background: #f8fafc !important; /* slate-50 para combinar com o tema claro */
+    background: #f8fafc; /* slate-50 para combinar com o tema claro */
     display: flex;
     justify-content: center;
 }
 
 .dark #preview-container {
-    background: #020617 !important; /* slate-950 para o tema escuro */
+    background: #020617; /* slate-950 para o tema escuro */
     display: flex;
     justify-content: center;
+}
+
+/* Garantir que hidden do Tailwind funcione (não sobrescrever) */
+#preview-container.hidden {
+    display: none !important;
 }
 
 .preview-paper {
@@ -193,79 +198,76 @@
 
 /* ═══════════ Print Styles ═══════════ */
 @media print {
-    /* Safe visibility approach */
-    body * {
-        visibility: hidden !important;
-    }
+    /* ESTRATÉGIA DE ISOLAMENTO ABSOLUTO */
     
-    #preview-container,
-    #preview-container * {
-        visibility: visible !important;
-    }
-    
-    #preview-container {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: white !important;
-        overflow: visible !important;
-    }
-    
-    .preview-paper {
-        /* Page break control */
-        break-after: page !important;
-        page-break-after: always !important;
-        
-        width: 100% !important;
-        max-width: none !important;
-        height: auto !important;
-        min-height: 100vh !important;
-        margin: 0 !important;
-        /* Keep internal content padding */
-        box-shadow: none !important;
-        color: black !important;
-        background: white !important;
-        border: none !important;
+    /* 1. Esconde tudo no body, exceto o main */
+    body > *:not(#app-main) {
+        display: none !important;
     }
 
-    /* Cancel fixed width logic from page modes */
-    .preview-paper[class*="page-a4"],
-    .preview-paper[class*="page-letter"],
-    .preview-paper[class*="page-legal"],
-    .paper-landscape,
-    .paper-portrait {
-        width: 100% !important;
-        min-height: auto !important;
-        padding: 0 !important;
-        margin: 0 !important;
+    /* 2. No main, esconde tudo exceto o preview */
+    #app-main > *:not(#preview-container) {
+        display: none !important;
     }
-    
+
+    /* 3. Limpeza de pais e remoção de travas de scroll (Causa do branco) */
+    html, body, #app-main, #preview-container {
+        overflow: visible !important;
+        height: auto !important;
+        min-height: auto !important;
+        background: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+        position: static !important;
+    }
+
+    /* 4. Reset do Zoom e Escala */
+    .paper-scale-wrapper {
+        display: block !important;
+        transform: none !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 5. A Página Física
+       Mantemos as dimensões em MM para o diálogo de impressão,
+       mas limpamos a estética de "software" */
+    .preview-paper {
+        margin: 0 auto !important;
+        box-shadow: none !important;
+        border: none !important;
+        display: block !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        background: white !important;
+    }
+
+    /* 6. Forçar contraste máximo (Corrige Dark Mode invisível) */
+    .preview-paper, 
     .preview-paper * {
         color: black !important;
+        background-color: transparent !important;
+        border-color: #eee !important;
     }
-    
-    .preview-paper table,
-    .preview-paper th,
-    .preview-paper td {
-        border-color: #ccc !important;
-    }
-    
-    /* Hide overlays */
+
+    /* 7. Esconde lixo de UI que possa ter restado */
     .page-break-line,
     .page-break-label,
-    #new-doc-modal,
-    #docs-modal,
     #global-drop-zone,
     .tour-overlay,
     .tour-tooltip,
     .tour-highlight-box {
         display: none !important;
-        visibility: hidden !important;
     }
-    
+
+    /* Tabelas e Código com quebra inteligente */
+    pre, code, table, tr, img {
+        page-break-inside: avoid;
+    }
+
     ::-webkit-scrollbar {
         display: none;
     }
