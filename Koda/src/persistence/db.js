@@ -2,7 +2,10 @@
 const DB_NAME = 'KodaEditorDB';
 const DB_VERSION = 1;
 
+let dbInstance = null;
+
 export function openDB() {
+    if (dbInstance) return Promise.resolve(dbInstance);
     return new Promise((resolve, reject) => {
         const req = indexedDB.open(DB_NAME, DB_VERSION);
         req.onupgradeneeded = (e) => {
@@ -15,7 +18,10 @@ export function openDB() {
                 db.createObjectStore('settings', { keyPath: 'key' });
             }
         };
-        req.onsuccess = () => resolve(req.result);
+        req.onsuccess = () => {
+            dbInstance = req.result;
+            resolve(dbInstance);
+        };
         req.onerror = () => reject(req.error);
     });
 }

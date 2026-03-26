@@ -1,0 +1,53 @@
+/* src/shared/styles/global.css */
+
+:root {
+  /* Colors */
+  --color-primary: #2b2bee;
+  --color-primary-hover: rgba(43, 43, 238, 0.9);
+  --color-primary-light: rgba(43, 43, 238, 0.05); /* Equivalent to bg-primary/5 */
+  --color-primary-alpha-20: rgba(43, 43, 238, 0.2);
+  --color-primary-alpha-30: rgba(43, 43, 238, 0.3);
+  --color-primary-alpha-50: rgba(43, 43, 238, 0.5);
+
+  --bg-light: #ffffff;
+  --bg-dark: #101022;
+  
+  /* Typography */
+  --font-display: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Spacing & Borders */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* Reset / Base styles (acting as foundation before modules) */
+body {
+  font-family: var(--font-display);
+  background-color: var(--bg-light);
+  color: #0f172a; /* text-slate-900 */
+}
+
+html.dark body {
+  background-color: var(--bg-dark);
+  color: #f1f5f9; /* text-slate-100 */
+}
+
+/* Base Buttons */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}

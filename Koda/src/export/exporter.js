@@ -13,44 +13,30 @@ export function downloadFile(content, filename, contentType) {
     URL.revokeObjectURL(url);
 }
 
-export function exportCurrent(format, text, titleInputVal) {
+export function exportCurrent(format, text, titleInputVal, pdfConfig = null) {
     const title = titleInputVal.trim() || 'Untitled Document';
     const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
     if (format === 'pdf') {
-        // Read current paper settings from DOM
-        const formatSelect = document.getElementById('cfg-paper-size');
-        const oriSelect    = document.getElementById('cfg-paper-orientation');
-        
-        const paperFormat = formatSelect ? formatSelect.value : 'a4';
-        const paperOri    = oriSelect    ? oriSelect.value    : 'portrait';
+        if (!pdfConfig || !pdfConfig.element) {
+            console.error('PDF export requires a configuration object with an element parameter.');
+            return;
+        }
 
-        const paperEl = document.querySelector('.preview-paper');
-        if (!paperEl) return;
+        const paperFormat = pdfConfig.paperFormat || 'a4';
+        const paperOri    = pdfConfig.paperOri || 'portrait';
+        const paperContainer = pdfConfig.element;
 
         // html2pdf options
         const opt = {
-            margin:       0, // Margins are already handled by CSS padding inside the paper
+            margin:       0,
             filename:     `${safeTitle}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: paperEl.scrollWidth },
+            html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
             jsPDF:        { unit: 'mm', format: paperFormat, orientation: paperOri }
         };
 
-        // Suppress visual scale trick for a clean, non-blinking 1:1 mm capture
-        const originalTransform = paperEl.style.transform;
-        paperEl.style.transform = 'none';
-        
-        // Hide elements that shouldn't be printed (like page break markers)
-        const noPrintEls = paperEl.querySelectorAll('[data-no-print="true"]');
-        noPrintEls.forEach(el => el.style.display = 'none');
-
-        html2pdf().set(opt).from(paperEl).save().then(() => {
-            // Restore hidden elements
-            noPrintEls.forEach(el => el.style.display = '');
-            // Seamlessly restore UI scale
-            paperEl.style.transform = originalTransform;
-        });
+        html2pdf().set(opt).from(paperContainer).save();
 
     } else if (format === 'md') {
         downloadFile(text, `${safeTitle}.md`, 'text/markdown');
@@ -58,6 +44,49 @@ export function exportCurrent(format, text, titleInputVal) {
         downloadFile(text, `${safeTitle}.txt`, 'text/plain');
     }
 }
+
+export function initExporter() {
+    let currentFormat = 'pdf';
+    document.querySelectorAll('.export-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('.export-option').forEach(el => {
+                el.classList.remove('border-primary', 'bg-primary/5');
+                el.classList.add('border-slate-200', 'dark:border-slate-800');
+                el.querySelector('.format-icon').classList.replace('text-primary', 'text-slate-400');
+                el.querySelector('.check-icon').classList.add('hidden');
+            });
+            opt.classList.remove('border-slate-200', 'dark:border-slate-800');
+            opt.classList.add('border-primary', 'bg-primary/5');
+            opt.querySelector('.format-icon').classList.replace('text-slate-400', 'text-primary');
+            opt.querySelector('.check-icon').classList.remove('hidden');
+            currentFormat = opt.dataset.format;
+        });
+    });
+
+    const downloadBtn = document.getElementById('btn-download');
+    const titleInput = document.getElementById('doc-title');
+    const textarea = document.getElementById('markdown-input');
+    
+    if(downloadBtn) {
+        downloadBtn.addEventListener('click', () => {
+            const paperFormat = document.getElementById('cfg-paper-size')?.value || 'a4';
+            const paperOri = document.getElementById('cfg-paper-orientation')?.value || 'portrait';
+            const paperContainer = document.getElementById('preview-container');
+
+            exportCurrent(currentFormat, textarea?.value, titleInput?.value, {
+                element: paperContainer,
+                paperFormat: paperFormat,
+                paperOri: paperOri
+            });
+        });
+    }
+    const topExport = document.getElementById('btn-top-export');
+    if (topExport) topExport.addEventListener('click', () => downloadBtn?.click());
+    
+    const backupZipBtn = document.getElementById('btn-backup-zip');
+    if (backupZipBtn) backupZipBtn.addEventListener('click', () => exportAllAsZip());
+}
+
 
 export async function exportAllAsZip() {
     try {
