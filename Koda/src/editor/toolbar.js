@@ -1,22 +1,24 @@
 // src/editor/toolbar.js
+import { editorView } from './sync.js';
 
 export function initToolbar() {
     const toolbarActions = document.getElementById('toolbar-actions');
-    const textarea = document.getElementById('markdown-input');
 
-    if(!toolbarActions || !textarea) return;
+    if(!toolbarActions) return;
 
     toolbarActions.addEventListener('click', (e) => {
+        if(!editorView) return;
         const btn    = e.target.closest('[data-action]');
         if (!btn) return;
         const action = btn.dataset.action;
-        const start  = textarea.selectionStart;
-        const end    = textarea.selectionEnd;
-        const sel    = textarea.value.substring(start, end);
-        const before = textarea.value.substring(0, start);
-        const after  = textarea.value.substring(end);
-        let insert   = '';
-
+        
+        const state = editorView.state;
+        const ranges = state.selection.ranges;
+        const start = ranges[0].from;
+        const end = ranges[0].to;
+        const sel = state.sliceDoc(start, end);
+        let insert = '';
+        
         switch (action) {
             case 'h1':        insert = `# ${sel || 'Heading 1'}`; break;
             case 'h2':        insert = `## ${sel || 'Heading 2'}`; break;
@@ -32,9 +34,10 @@ export function initToolbar() {
             case 'code':      insert = '\n```\n' + (sel || 'code here') + '\n```\n'; break;
         }
 
-        textarea.value = before + insert + after;
-        textarea.focus();
-        textarea.setSelectionRange(start + insert.length, start + insert.length);
-        textarea.dispatchEvent(new Event('input'));
+        editorView.dispatch({
+            changes: {from: start, to: end, insert},
+            selection: {anchor: start + insert.length}
+        });
+        editorView.focus();
     });
 }

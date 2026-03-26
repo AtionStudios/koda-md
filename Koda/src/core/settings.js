@@ -3,8 +3,10 @@ import { dbGet, dbPut } from '../persistence/db.js';
 import { PAGE_HEIGHTS } from '../shared/config/constants.js';
 import { getCurrentDocId } from './documentManager.js';
 import { applyPageMode, isPageModeActive } from '../ui/viewModes.js';
+import { editorView } from '../editor/sync.js';
+import { setLineNumbers } from '../editor/codemirror_setup.js';
 
-let cfgFontFamily, cfgFontSize, cfgLineHeight, cfgPaperSize, cfgPaperOri, pageBreakToggle, multiBreakToggle, preview;
+let cfgFontFamily, cfgFontSize, cfgLineHeight, cfgPaperSize, cfgPaperOri, pageBreakToggle, multiBreakToggle, lineNumbersToggle, preview;
 let cfgMT, cfgMB, cfgML, cfgMR;
 
 export function initSettings() {
@@ -19,11 +21,15 @@ export function initSettings() {
     cfgMR         = document.getElementById('cfg-margin-right');
     pageBreakToggle = document.getElementById('toggle-page-breaks');
     multiBreakToggle = document.getElementById('toggle-multi-breaks');
+    lineNumbersToggle = document.getElementById('toggle-line-numbers');
     preview       = document.getElementById('preview-container'); // Container of pages
 
-    [cfgFontFamily, cfgFontSize, cfgLineHeight, cfgPaperSize, cfgPaperOri, cfgMT, cfgMB, cfgML, cfgMR, pageBreakToggle, multiBreakToggle].forEach(el => {
+    [cfgFontFamily, cfgFontSize, cfgLineHeight, cfgPaperSize, cfgPaperOri, cfgMT, cfgMB, cfgML, cfgMR, pageBreakToggle, multiBreakToggle, lineNumbersToggle].forEach(el => {
         if(el) {
             el.addEventListener('change', () => {
+                if(el === lineNumbersToggle) {
+                    setLineNumbers(editorView, el.checked);
+                }
                 window.dispatchEvent(new CustomEvent('koda-request-render'));
                 saveSettings();
             });
@@ -52,6 +58,12 @@ export async function loadSettings() {
         if (s.theme === 'light') document.documentElement.classList.remove('dark');
         if (s.pageBreaks && pageBreakToggle) pageBreakToggle.checked = true;
         if (s.multiBreaks && multiBreakToggle) multiBreakToggle.checked = true;
+        
+        if (s.lineNumbers !== undefined && lineNumbersToggle) {
+            lineNumbersToggle.checked = s.lineNumbers;
+            // Delay a tick if editor is not fully mounted yet
+            setTimeout(() => setLineNumbers(editorView, s.lineNumbers), 50);
+        }
     } catch {
         // Settings failed to load, continue with defaults
     }
@@ -73,6 +85,7 @@ export function saveSettings() {
         theme:      isDark ? 'dark' : 'light',
         pageBreaks: pageBreakToggle?.checked || false,
         multiBreaks: multiBreakToggle?.checked || false,
+        lineNumbers: lineNumbersToggle?.checked ?? false,
         lastDocId:  getCurrentDocId()
     });
 }

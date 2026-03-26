@@ -1,7 +1,7 @@
 // src/core/documentManager.js
 import { dbPut, dbGet, dbGetAll, dbDelete } from '../persistence/db.js';
 import { saveSettings } from './settings.js';
-// renderPreview import removed to fix circular dependency
+import { editorView } from '../editor/sync.js';
 
 let currentDocId = null;
 
@@ -21,12 +21,13 @@ function escapeHtml(str) {
 
 export async function saveCurrentDoc(showSaveStatusCb) {
     const titleInput = document.getElementById('doc-title');
-    const textarea = document.getElementById('markdown-input');
     if (!currentDocId) currentDocId = generateId();
+    const content = editorView ? editorView.state.doc.toString() : '';
+
     await dbPut('documents', {
         id:        currentDocId,
-        title:     titleInput.value.trim() || 'Untitled Document',
-        content:   textarea.value,
+        title:     titleInput?.value.trim() || 'Untitled Document',
+        content:   content,
         updatedAt: Date.now()
     });
     saveSettings();
@@ -39,7 +40,13 @@ export async function loadDoc(id) {
     if (!doc) return;
     currentDocId = doc.id;
     document.getElementById('doc-title').value = doc.title;
-    document.getElementById('markdown-input').value = doc.content;
+    
+    if (editorView) {
+        editorView.dispatch({
+            changes: {from: 0, to: editorView.state.doc.length, insert: doc.content || ''}
+        });
+    }
+
     window.dispatchEvent(new CustomEvent('koda-request-render'));
     saveSettings();
     renderDocList();
@@ -54,7 +61,13 @@ export async function deleteDoc(id) {
 export function createNewDocument(title, content) {
     currentDocId = generateId();
     document.getElementById('doc-title').value = title || 'Untitled Document';
-    document.getElementById('markdown-input').value = content || '';
+    
+    if (editorView) {
+        editorView.dispatch({
+            changes: {from: 0, to: editorView.state.doc.length, insert: content || ''}
+        });
+    }
+
     window.dispatchEvent(new CustomEvent('koda-request-render'));
     saveSettings();
     renderDocList();

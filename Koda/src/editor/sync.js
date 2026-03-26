@@ -3,21 +3,21 @@ import { parseAndSanitize, htmlToMarkdown } from '../renderer/markdown.js';
 import { applyTypography, getPageSettings } from '../core/settings.js';
 import { saveCurrentDoc } from '../core/documentManager.js';
 import { Paginator } from '../core/paginator.js';
+import { createEditor } from './codemirror_setup.js';
 
 const paginator = new Paginator('page-wrapper');
 
 let isSyncing = false;
-let isPreviewEditing = false;
 let saveTimeout = null;
-let previewEditTimeout = null;
 
-let textarea, preview, editorContainer, previewContainer, titleInput, statWords, statLines, statSaved;
+let editorContainer, previewContainer, titleInput, statWords, statLines, statSaved;
+
+export let editorView = null; // Instância do CodeMirror acessível globalmente
 
 export function initEditorSync() {
     window.addEventListener('koda-request-render', () => renderPreview());
     
-    textarea = document.getElementById('markdown-input');
-    // preview is now multiple pages inside previewContainer
+    const editorWrapper = document.getElementById('codemirror-wrapper');
     editorContainer = document.getElementById('editor-container');
     previewContainer = document.getElementById('preview-container');
     titleInput = document.getElementById('doc-title');
@@ -25,21 +25,27 @@ export function initEditorSync() {
     statLines = document.getElementById('stat-lines');
     statSaved = document.getElementById('stat-saved');
 
-    if (textarea) {
-        textarea.addEventListener('input', () => {
+    if (editorWrapper) {
+        const isDark = document.documentElement.classList.contains('dark');
+        const enableLineNumbers = document.getElementById('toggle-line-numbers')?.checked || false;
+
+        editorView = createEditor(editorWrapper, "", (text, update) => {
             renderPreview();
             showSaveStatus(false);
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(() => saveCurrentDoc(showSaveStatus), 2000);
-        });
+        }, enableLineNumbers, isDark);
 
-        textarea.addEventListener('scroll', () => {
-            if (isSyncing || previewContainer.classList.contains('hidden')) return;
-            isSyncing = true;
-            const maxT = textarea.scrollHeight - textarea.clientHeight;
-            if (maxT > 0) previewContainer.scrollTop = (textarea.scrollTop / maxT) * (previewContainer.scrollHeight - previewContainer.clientHeight);
-            requestAnimationFrame(() => { isSyncing = false; });
-        });
+        const cmScroller = editorWrapper.querySelector('.cm-scroller');
+        if (cmScroller) {
+            cmScroller.addEventListener('scroll', () => {
+                if (isSyncing || previewContainer.classList.contains('hidden')) return;
+                isSyncing = true;
+                const maxT = cmScroller.scrollHeight - cmScroller.clientHeight;
+                if (maxT > 0) previewContainer.scrollTop = (cmScroller.scrollTop / maxT) * (previewContainer.scrollHeight - previewContainer.clientHeight);
+                requestAnimationFrame(() => { isSyncing = false; });
+            });
+        }
     }
 
     if (titleInput) {
@@ -54,16 +60,20 @@ export function initEditorSync() {
             if (isSyncing || editorContainer.classList.contains('hidden')) return;
             isSyncing = true;
             const maxP = previewContainer.scrollHeight - previewContainer.clientHeight;
-            if (maxP > 0) textarea.scrollTop = (previewContainer.scrollTop / maxP) * (textarea.scrollHeight - textarea.clientHeight);
+            if (maxP > 0 && editorWrapper) {
+                const cmScroller = editorWrapper.querySelector('.cm-scroller');
+                if (cmScroller) cmScroller.scrollTop = (previewContainer.scrollTop / maxP) * (cmScroller.scrollHeight - cmScroller.clientHeight);
+            }
             requestAnimationFrame(() => { isSyncing = false; });
         });
     }
 }
 
 export function renderPreview() {
-    if(!textarea || !paginator) return;
+    if(!editorView || !paginator) return;
     const settings = getPageSettings();
-    const html = parseAndSanitize(textarea.value, { multiBreaks: settings.multiBreaks });
+    const text = editorView.state.doc.toString();
+    const html = parseAndSanitize(text, { multiBreaks: settings.multiBreaks });
     
     paginator.render(html, settings);
     
@@ -88,8 +98,8 @@ function applyTypographyToPage(page) {
 }
 
 export function updateStats() {
-    if(!textarea || !statWords || !statLines) return;
-    const text    = textarea.value;
+    if(!editorView || !statWords || !statLines) return;
+    const text    = editorView.state.doc.toString();
     const words   = text.trim() ? text.trim().split(/\s+/).length : 0;
     const lines   = text ? text.split('\n').length : 0;
     statWords.textContent = `Words: ${words}`;
