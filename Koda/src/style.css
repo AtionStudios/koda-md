@@ -1,29 +1,94 @@
 /* koda.css — Koda Markdown Editor Styles */
 
 /* ═══════════ Preview Paper ═══════════ */
-.preview-paper {
+/* Wrapper to handle scaling and centering the physical paper */
+.paper-scale-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 0;
+    width: 100%;
+    min-width: fit-content;
+    background: transparent !important;
     margin: 0 auto;
-    position: relative;
-    padding: 60px;
-    min-height: 400px;
-    outline: none;
-    transition: max-width 0.3s ease;
 }
 
+#preview-container {
+    background: #f8fafc; /* slate-50 para combinar com o tema claro */
+    display: flex;
+    justify-content: center;
+}
+
+.dark #preview-container {
+    background: #020617; /* slate-950 para o tema escuro */
+    display: flex;
+    justify-content: center;
+}
+
+/* Garantir que hidden do Tailwind funcione (não sobrescrever) */
+#preview-container.hidden {
+    display: none !important;
+}
+
+.preview-paper {
+    background: white;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    position: relative;
+    outline: none;
+    flex-shrink: 0;
+    border-radius: 1px;
+    margin-bottom: 20px; /* Space between pages in preview */
+    overflow: hidden;
+    box-sizing: border-box;
+    
+    padding: 0; /* Handled by .page-margin-container */
+}
+
+.page-margin-container {
+    /* Fixed utility area where content lives */
+    box-sizing: border-box;
+}
+
+.page-content {
+    width: 100%;
+    display: flow-root; 
+}
+
+/* Focus and hover states for content editable */
 .preview-paper[contenteditable="true"]:hover {
     box-shadow: 0 0 0 2px #2b2bee33, 0 25px 50px -12px rgb(0 0 0 / 0.25);
 }
-
 .preview-paper[contenteditable="true"]:focus {
     box-shadow: 0 0 0 2px #2b2bee66, 0 25px 50px -12px rgb(0 0 0 / 0.25);
 }
 
-.paper-portrait {
-    max-width: 800px;
-}
+/* ═══════════ F1: Real Page Mode (Physical Sizes) ═══════════ */
 
-.paper-landscape {
-    max-width: 1120px;
+/* Dimensions in mm directly matching real paper */
+/* Dimensions in mm directly matching real paper */
+.page-a4-portrait {
+    width: 210mm;
+    height: 297mm;
+}
+.page-a4-landscape {
+    width: 297mm;
+    height: 210mm;
+}
+.page-letter-portrait {
+    width: 215.9mm;
+    height: 279.4mm;
+}
+.page-letter-landscape {
+    width: 279.4mm;
+    height: 215.9mm;
+}
+.page-legal-portrait {
+    width: 215.9mm;
+    height: 355.6mm;
+}
+.page-legal-landscape {
+    width: 355.6mm;
+    height: 215.9mm;
 }
 
 /* ═══════════ Page Break Visuals ═══════════ */
@@ -133,53 +198,268 @@
 
 /* ═══════════ Print Styles ═══════════ */
 @media print {
-    body * {
-        visibility: hidden !important;
-    }
-    #preview-container,
-    #preview-container * {
-        visibility: visible !important;
-    }
-    #preview-container {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        background: white !important;
-        overflow: visible !important;
-    }
-    .preview-paper {
-        box-shadow: none !important;
-        max-width: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        color: black !important;
-        background: white !important;
-    }
+    /* ESTRATÉGIA DE ISOLAMENTO ABSOLUTO */
     
-    @page {
-        margin: 20mm;
-    }
-    
-    .paper-landscape {
-        width: 297mm !important;
-        height: 210mm !important;
-    }
-    .preview-paper * {
-        color: black !important;
-    }
-    .preview-paper table,
-    .preview-paper th,
-    .preview-paper td {
-        border-color: #ccc !important;
-    }
-    .page-break-line,
-    .page-break-label {
+    /* 1. Esconde tudo no body, exceto o main */
+    body > *:not(#app-main) {
         display: none !important;
     }
+
+    /* 2. No main, esconde tudo exceto o preview */
+    #app-main > *:not(#preview-container) {
+        display: none !important;
+    }
+
+    /* 3. Limpeza de pais e remoção de travas de scroll (Causa do branco) */
+    html, body, #app-main, #preview-container {
+        overflow: visible !important;
+        height: auto !important;
+        min-height: auto !important;
+        background: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+        position: static !important;
+    }
+
+    /* 4. Reset do Zoom e Escala */
+    .paper-scale-wrapper {
+        display: block !important;
+        transform: none !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 5. A Página Física
+       Mantemos as dimensões em MM para o diálogo de impressão,
+       mas limpamos a estética de "software" */
+    .preview-paper {
+        margin: 0 auto !important;
+        box-shadow: none !important;
+        border: none !important;
+        display: block !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        background: white !important;
+    }
+
+    /* 6. Forçar contraste máximo (Corrige Dark Mode invisível) */
+    .preview-paper, 
+    .preview-paper * {
+        color: black !important;
+        background-color: transparent !important;
+        border-color: #eee !important;
+    }
+
+    /* 7. Esconde lixo de UI que possa ter restado */
+    .page-break-line,
+    .page-break-label,
+    #global-drop-zone,
+    .tour-overlay,
+    .tour-tooltip,
+    .tour-highlight-box {
+        display: none !important;
+    }
+
+    /* Tabelas e Código com quebra inteligente */
+    pre, code, table, tr, img {
+        page-break-inside: avoid;
+    }
+
     ::-webkit-scrollbar {
         display: none;
     }
+}
+
+
+/* ═══════════ F2: Drop Zone ═══════════ */
+.drop-zone-active {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(43, 43, 238, 0.12);
+    border: 3px dashed #2b2bee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    backdrop-filter: blur(2px);
+}
+
+.drop-zone-active .drop-zone-label {
+    background: #2b2bee;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 24px 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 20px 60px rgba(43,43,238,0.4);
+    pointer-events: none;
+}
+
+/* Template card grid */
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.template-card {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.dark .template-card {
+    border-color: #334155;
+    background: #1e293b;
+}
+
+.template-card:hover,
+.template-card.selected {
+    border-color: #2b2bee;
+    background: #eef2ff;
+    box-shadow: 0 0 0 3px rgba(43,43,238,0.12);
+}
+
+.dark .template-card:hover,
+.dark .template-card.selected {
+    background: #1e1b4b;
+}
+
+.template-card .template-icon {
+    font-size: 2rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+/* ═══════════ F3: Onboarding Tour ═══════════ */
+.tour-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+.tour-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    pointer-events: all;
+}
+
+.tour-highlight-box {
+    position: fixed;
+    background: transparent;
+    box-shadow: 0 0 0 4px #2b2bee, 0 0 0 9999px rgba(0,0,0,0.55);
+    border-radius: 8px;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 10001;
+}
+
+.tour-tooltip {
+    position: fixed;
+    background: white;
+    border-radius: 14px;
+    padding: 20px 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 320px;
+    z-index: 10002;
+    pointer-events: all;
+    animation: tourFadeIn 0.25s ease;
+}
+
+.dark .tour-tooltip {
+    background: #1e293b;
+    color: #f1f5f9;
+}
+
+@keyframes tourFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.tour-tooltip .tour-step-count {
+    font-size: 11px;
+    font-weight: 700;
+    color: #2b2bee;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+}
+
+.tour-tooltip h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #0f172a;
+}
+.dark .tour-tooltip h4 { color: #f1f5f9; }
+
+.tour-tooltip p {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+}
+.dark .tour-tooltip p { color: #94a3b8; }
+
+.tour-tooltip .tour-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    gap: 8px;
+}
+
+.tour-btn-next {
+    background: #2b2bee;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+.tour-btn-next:hover { opacity: 0.85; }
+
+.tour-btn-skip {
+    background: none;
+    border: none;
+    font-size: 12px;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+.tour-btn-skip:hover { color: #64748b; }
+
+.tour-progress {
+    display: flex;
+    gap: 5px;
+}
+
+.tour-dot {
+    width: 7px; height: 7px;
+    border-radius: 99px;
+    background: #e2e8f0;
+    transition: background 0.2s, width 0.2s;
+}
+.tour-dot.active {
+    background: #2b2bee;
+    width: 18px;
 }

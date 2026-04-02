@@ -1,0 +1,15 @@
+<!-- src/modules/editor_view/editor.html -->
+<main class="flex flex-1 min-h-0 overflow-hidden" id="app-main">
+<!-- Editor Column -->
+<div class="w-1/2 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col min-h-0" id="editor-container">
+<div id="codemirror-wrapper" class="flex-1 w-full overflow-y-auto"></div>
+</div>
+<!-- Preview Column -->
+<div class="w-1/2 bg-slate-100 dark:bg-slate-950 overflow-y-auto" id="preview-container">
+<div class="paper-scale-wrapper" id="page-wrapper">
+    <!-- Pages will be injected here by the Paginator -->
+</div>
+</div>
+<!-- Settings Sidebar injected here -->
+<div id="app-sidebar"></div>
+</main>

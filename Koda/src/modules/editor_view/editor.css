@@ -1,0 +1,31 @@
+/* src/modules/editor_view/editor.css */
+
+/* 
+ * Layout Centralizado no Modo Código (Visão 100% CodeMirror)
+ * Facilita a leitura em monitores ultra-wide 
+ */
+
+ body.mode-code #editor-container {
+    background-color: #f1f5f9; /* slate-100 para dar contraste como na mesa da preview */
+}
+
+.dark body.mode-code #editor-container {
+    background-color: #020617; /* slate-950 no formato dark */
+}
+
+/* Transformamos o editor em um "documento centralizado" neste modo */
+body.mode-code .cm-editor {
+    max-width: 850px;
+    margin: 0 auto;
+    background-color: white !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+}
+
+.dark body.mode-code .cm-editor {
+    background-color: #0f172a !important; /* bg slate-900 isolado do fundo 950 */
+    border-left: 1px solid #1e293b;
+    border-right: 1px solid #1e293b;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+}
